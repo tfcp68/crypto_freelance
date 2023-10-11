@@ -1,0 +1,39 @@
+{% extends "base_eth.html" %}
+
+{% block content %}
+    {% if not contracts %}
+        <p>Contracts not found</p>
+    {% else %}
+        <table>
+            <thead>
+            <tr>
+                <td>Address</td>
+                <td>Status</td>
+                <td>Created</td>
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for contract_data in contracts %}
+                <tr>
+                    <td>
+                        <a href="{{ url }}{{ contract_data.0 }}">
+                            {{ contract_data.1 }}
+                        </a>
+                    </td>
+                    <td>
+                        {% if not contract_data.2 %}
+                            <font color="darkgreen">Opened</font>
+                        {% else %}
+                            <font color="#8b0000">Closed</font>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ contract_data.3 }}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock content %}

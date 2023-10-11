@@ -1,0 +1,223 @@
+{% extends "base_eth.html" %}
+
+{% block content %}
+    {% if alert_msg %}
+        <script type="text/javascript">
+            alert("{{ alert_msg }}");
+        </script>
+    {% endif %}
+
+    <h1>Smart contract address:</h1>
+    <p>{{ address }}</p>
+
+    <h1>Smart contract status:</h1>
+    <p>
+        {% if is_closed %}
+            <font color="#8b0000">Closed</font>
+        {% else %}
+            <font color="#006400">Opened</font>
+        {% endif %}
+    </p>
+
+    <h1>Created:</h1>
+    <p>{{ created_at }}</p>
+
+    <h1>Customer:</h1>
+    <p>
+        <a href="#">{{ customer }}</a>
+    </p>
+
+    <h1>Executor:</h1>
+    <p>
+        <a href="#">{{ executor }}</a>
+    </p>
+
+    <h1>Task:</h1>
+    <p>{{ task_data_text }}</p>
+
+    <h1>Тask HASH:</h1>
+    <p>{{ task_data.sha256hashsum }}</p>
+
+    <h1>Solution:</h1>
+    {% if solution_data is None %}
+        <p>Nothing</p>
+    {% else %}
+        <table>
+            <thead>
+            <tr>
+                <td>Text</td>
+                <td>HASH</td>
+                <td>Created</td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for text, solution in solution_data %}
+                <tr>
+                    <td>{{ text }}</td>
+                    <td>{{ solution.sha256hashsum }}</td>
+                    <td>{{ solution.timestamp }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    <h1>Customer arguments:</h1>
+    {% if not customer_arguments %}
+        <p>No arguments</p>
+    {% else %}
+        <table>
+            <thead>
+            <tr>
+                <td><em>Text</em></td>
+                <td><em>HASH</em></td>
+                <td><em>Created</em></td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for text, argument in customer_arguments %}
+                <tr>
+                    <td>{{ text }}</td>
+                    <td>{{ argument.sha256hashsum }}</td>
+                    <td>{{ argument.timestamp }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    <h1>Executor arguments:</h1>
+    {% if not executor_arguments %}
+        <p>No arguments</p>
+    {% else %}
+        <table>
+            <thead>
+            <tr>
+                <td><em>Text</em></td>
+                <td><em>HASH</em></td>
+                <td><em>Created</em></td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for text, argument in executor_arguments %}
+                <tr>
+                    <td>{{ text }}</td>
+                    <td>{{ argument.sha256hashsum }}</td>
+                    <td>{{ argument.timestamp }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if add_argument_form is not None %}
+        <h1>Add argument:</h1>
+        <form action="{% url 'eth-add-argument' pk=pk %}" method="POST">
+            {% csrf_token %}
+            {{ add_argument_form.as_p }}
+
+            <button type="submit">Add argument for {{ add_argument_operation_gas }} (gas) ETH</button>
+        </form>
+    {% endif %}
+
+    <h1>Time left until the end of judgment:</h1>
+    {% if judgment_time_left is None %}
+        <p>Judgment ended</p>
+    {% else %}
+        <p>{{ judgment_time_left }}</p>
+    {% endif %}
+
+    <h1>Number of votes:</h1>
+    <p>{{ num_votes }}</p>
+
+{#    {% if voting_form is not None %}#}
+{#        <h1>Vote:</h1>#}
+{#        <form action="{% url 'eth-vote-for' pk=pk step=0 %}" method="POST">#}
+{#            {% csrf_token %}#}
+{#            {{ voting_form.as_p }}#}
+{##}
+{#            <button type="submit">Vote for {{ voting_fee }} {{ token_name }}</button>#}
+{#        </form>#}
+{#    {% endif %}#}
+
+    {% if show_vote_button %}
+        <a href="{% url 'eth-vote-for' pk=pk step=0 %}">
+            <button type="button">Vote!</button>
+        </a>
+    {% endif %}
+
+    {% if votes_for_customer is not None and votes_for_executor is not None %}
+        <h1>Judgment results:</h1>
+        <h2>Winner:</h2>
+        {% if votes_for_customer|length < votes_for_executor|length %}
+            Executor: <a href="#">{{ executor }}</a>
+        {% else %}
+            Customer: <a href="#">{{ customer }}</a>
+        {% endif %}
+        <h2>Votes for customer ({{ votes_for_customer|length }}):</h2>
+        {% if votes_for_customer is not None and votes_for_customer %}
+            <table>
+                <thead>
+                <tr>
+                    <td>Judge</td>
+                    <td>Details</td>
+                    <td>Details HASH</td>
+                    <td>Date</td>
+                </tr>
+                </thead>
+                <tbody>
+                {% for vote in votes_for_customer %}
+                    <tr>
+                        <td>
+                            <a href="#">{{ vote.0 }}</a>
+                        </td>
+                        <td>{{ vote.1 }}</td>
+                        <td>{{ vote.2.sha256hashsum }}</td>
+                        <td>{{ vote.2.timestamp }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No votes</p>
+        {% endif %}
+
+        <h2>Votes for executor ({{ votes_for_executor|length }}):</h2>
+        {% if votes_for_executor is not None and votes_for_executor %}
+            <table>
+                <thead>
+                <tr>
+                    <td>Judge</td>
+                    <td>Details</td>
+                    <td>Details HASH</td>
+                    <td>Date</td>
+                </tr>
+                </thead>
+                <tbody>
+                {% for vote in votes_for_executor %}
+                    <tr>
+                        <td>
+                            <a href="#">{{ vote.0 }}</a>
+                        </td>
+                        <td>{{ vote.1 }}</td>
+                        <td>{{ vote.2.sha256hashsum }}</td>
+                        <td>{{ vote.2.timestamp }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No votes</p>
+        {% endif %}
+    {% endif %}
+
+    {#    <a href="{% url 'eth-make-deal-contract-info' pk=make_deal_pk %}">#}
+    {#        <button>To make deal smart contract</button>#}
+    {#    </a>#}
+
+    {% if execution_pk is not None %}
+        <a href="{% url 'eth-execution-contract-info' pk=execution_contract_pk %}">
+            <button>To execution smart contract</button>
+        </a>
+    {% endif %}
+{% endblock content %}

@@ -1,0 +1,72 @@
+{
+	"compiler": {
+		"version": "0.8.17+commit.8df45f5f"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [],
+				"name": "getMakeDealContractAddress",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getTaskInfoContractAddress",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/IExecution.sol": "IExecution"
+		},
+		"evmVersion": "london",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"contracts/IExecution.sol": {
+			"keccak256": "0x162891db61dd39f9d228cd807b67efa3b4f0c9f4881aff435f2bf894c2ed68cc",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://f34feda88b97c47fc5a6570723b883b64a79a501d99ac4736287cc84b40bdbfe",
+				"dweb:/ipfs/Qme9outK8zJoopcof1CFzD4U7ErK3R9FozPeoJJwTePimW"
+			]
+		}
+	},
+	"version": 1
+}

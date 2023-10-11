@@ -1,0 +1,26 @@
+{% extends "base_ton.html" %}
+
+{% block content %}
+    <h1>TON address:</h1>
+    <p>{{ ton_address }}</p>
+
+    <a href="{% url 'ton-owned-make-deal-contracts' %}">
+        <h1>My owned deals</h1>
+    </a>
+
+    <a href="{% url 'ton-owned-execution-contracts' %}">
+        <h1>My owned execution smart contracts</h1>
+    </a>
+
+    <a href="{% url 'ton-owned-judgment-contracts' %}">
+        <h1>My owned judgment smart contracts</h1>
+    </a>
+
+    <a href="{% url 'ton-i-execute' %}">
+        <h1>I execute</h1>
+    </a>
+
+    <a href="{% url 'ton-i-judge' %}">
+        <h1>I judge</h1>
+    </a>
+{% endblock content %}

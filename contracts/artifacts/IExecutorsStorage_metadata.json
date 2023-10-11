@@ -1,0 +1,187 @@
+{
+	"compiler": {
+		"version": "0.8.17+commit.8df45f5f"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "executor_address",
+						"type": "address"
+					}
+				],
+				"name": "addExecutor",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address[]",
+						"name": "chosen_executors",
+						"type": "address[]"
+					}
+				],
+				"name": "chooseExecutors",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getExecutors",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "address",
+								"name": "executorAddress",
+								"type": "address"
+							},
+							{
+								"internalType": "bool",
+								"name": "wasChosen",
+								"type": "bool"
+							}
+						],
+						"internalType": "struct utils.ExecutorData[]",
+						"name": "",
+						"type": "tuple[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getNumExecutors",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "exclude",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "deposit",
+						"type": "uint256"
+					},
+					{
+						"internalType": "contract IERC20",
+						"name": "token",
+						"type": "address"
+					}
+				],
+				"name": "returnDepositToRespondedExecutors",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "executor_address",
+						"type": "address"
+					}
+				],
+				"name": "wasChosen",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "executor_address",
+						"type": "address"
+					}
+				],
+				"name": "wasResponded",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/IExecutorsStorage.sol": "IExecutorsStorage"
+		},
+		"evmVersion": "london",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"@openzeppelin/contracts/token/ERC20/IERC20.sol": {
+			"keccak256": "0x9750c6b834f7b43000631af5cc30001c5f547b3ceb3635488f140f60e897ea6b",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://5a7d5b1ef5d8d5889ad2ed89d8619c09383b80b72ab226e0fe7bde1636481e34",
+				"dweb:/ipfs/QmebXWgtEfumQGBdVeM6c71McLixYXQP5Bk6kKXuoY4Bmr"
+			]
+		},
+		"contracts/IExecutorsStorage.sol": {
+			"keccak256": "0xe41e48f1545e100941844cc73a9038a1fd914101d958533aa98e4e8e74789940",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://5a560a0b847b1d1ebb26a16a84a796795639e3147ca7a889e5cf40b030183889",
+				"dweb:/ipfs/Qmb7Y2SgANW1h6ZabnA3atoq3d7EqcXQUBBxrts8inyeGz"
+			]
+		},
+		"contracts/utils.sol": {
+			"keccak256": "0x8c6c150b5f08817349111b9ba705905ae3112231679057666b590a124129045e",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://4ee3032ccce6ec3449411d50121ffbefc0117899cc4f24657c7b40f16810925a",
+				"dweb:/ipfs/QmTrzutQUDffJsYHKWFXuvGwbrLkbUCDUhQP6pxwaoa4hX"
+			]
+		}
+	},
+	"version": 1
+}

@@ -1,0 +1,59 @@
+{
+	"compiler": {
+		"version": "0.8.17+commit.8df45f5f"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [],
+				"name": "getTaskInfoContractAddress",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/IMakeDeal.sol": "IMakeDeal"
+		},
+		"evmVersion": "london",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"contracts/IMakeDeal.sol": {
+			"keccak256": "0x2bb8ec88ddf341de870f4fcb2c274f45fad6cae7aca33888287cf1aa3314b0ae",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://deee596b0816a893e5d716780d2d7998c5f9d85bd7cfec667c1621c09337e1e5",
+				"dweb:/ipfs/QmbDN5B2kBqssFXLUejKgUoh73qzyzZStj4aGDAfS54NQc"
+			]
+		}
+	},
+	"version": 1
+}

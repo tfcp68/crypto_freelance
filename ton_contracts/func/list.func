@@ -1,0 +1,78 @@
+#pragma version >0.4;
+
+int list_empty?(cell list) {
+    return list.begin_parse().slice_empty?();
+}
+
+(cell, ()) ~list_push(cell list, cell data) {
+    if (list.list_empty?()) {
+        cell new_list = begin_cell()
+                   .store_ref(data)
+                   .store_ref(begin_cell().end_cell())
+                   .end_cell();
+        return (new_list, ());
+    }
+
+    slice ls = list.begin_parse();
+
+    cell list_data = ls~load_ref();
+    cell next = ls~load_ref();
+    next~list_push(data);
+    cell new_list = begin_cell()
+                    .store_ref(list_data)
+                    .store_ref(next)
+                    .end_cell();
+    return (new_list, ());
+}
+
+(cell, cell) ~list_pop(cell list) {
+    if (list.list_empty?()) {
+        return (list, null());
+    }
+
+    slice ls = list.begin_parse();
+
+    cell data_cell = ls~load_ref();
+    cell next = ls~load_ref();
+
+    if (next.list_empty?()) {
+        cell new_list = begin_cell().end_cell();
+        return (new_list, data_cell);
+    }
+
+    cell popped = next~list_pop();
+    cell new_list = begin_cell()
+                    .store_ref(data_cell)
+                    .store_ref(next)
+                    .end_cell();
+
+    return (new_list, popped);
+}
+
+int list_contains?(cell list, cell data) {
+    if (list.list_empty?()) {
+        return 0;
+    }
+
+    slice ls = list.begin_parse();
+
+    cell list_data = ls~load_ref();
+    cell next = ls~load_ref();
+
+    if (list_data.cell_hash() == data.cell_hash()) {
+        return -1;
+    }
+
+    return next.list_contains?(data);
+}
+
+int list_size(cell list) {
+    int size = 0;
+
+    while ~ (list.list_empty?()) {
+        size = size + 1;
+        list~list_pop();
+    }
+
+    return size;
+}

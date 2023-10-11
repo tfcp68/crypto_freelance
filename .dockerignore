@@ -1,0 +1,10 @@
+node_modules
+__pycache__
+.git*
+*.sqlite3
+*.sh
+*.Dockerfile
+docker-compose.yaml
+.idea
+venv
+static

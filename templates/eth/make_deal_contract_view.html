@@ -1,0 +1,116 @@
+{% extends "base_eth.html" %}
+
+{% block content %}
+    <h1>Smart contract address:</h1>
+    <p>{{ address }}</p>
+
+    <h1>Smart contract status:</h1>
+    <p>
+        {% if is_closed %}
+            <font color="#8b0000">Closed</font>
+        {% else %}
+            <font color="#006400">Opened</font>
+        {% endif %}
+    </p>
+
+    <h1>Created:</h1>
+    <p>{{ created_at }}</p>
+
+    <h1>Customer:</h1>
+    <p>
+        <a href="{{ customer.get_profile_url }}">{{ customer }}</a>
+    </p>
+
+    <h1>Тask:</h1>
+    <p>{{ task_data_text }}</p>
+
+    <h1>Тask HASH:</h1>
+    <p>{{ task_data.sha256hashsum }}</p>
+
+    <h1>Price:</h1>
+    <table>
+        <tr>
+            <td>Security deposit ({{ security_deposit_percent }}%)</td>
+            <td>{{ security_deposit }} {{ token_name }}</td>
+        </tr>
+        <tr>
+            <td>Price for work</td>
+            <td>{{ price }} {{ token_name }}</td>
+        </tr>
+    </table>
+
+    {% if not activated and user == customer %}
+        <h1>Activate contract:</h1>
+        <form method="POST" action="{% url 'eth-make-deal-contract-activate' pk=pk step=0 %}">
+            {% csrf_token %}
+            <input type="hidden" name="pk" value="{{ pk }}"/>
+            <button type="submit">Activate!</button>
+        </form>
+    {% else %}
+
+        {% if responded_executors is not None and responded_executors %}
+            <h1>Responded executors:</h1>
+            <table>
+                {% for executor in responded_executors %}
+                    <tr>
+                        <td>
+                            <a href="{{ executor.get_profile_url }}">{{ executor }}</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        {% if chosen_executors is not None and chosen_executors %}
+            <h1>Chosen executors:</h1>
+            <table>
+                {% for executor in chosen_executors %}
+                    <tr>
+                        <td>
+                            <a href="{{ executor.get_profile_url }}">{{ executor }}</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        {% if executor_choices_form is not None %}
+            <form method="POST">
+                {% csrf_token %}
+                <h1>Add executors:</h1>
+                {{ executor_choices_form }}
+                <button type="submit">Add</button>
+            </form>
+        {% endif %}
+
+        {% if executor is not None %}
+            <h1>Executor:</h1>
+            <p>
+                <a href="{{ executor.get_profile_url }}">{{ executor }}</a>
+            </p>
+        {% endif %}
+
+        {% if show_respond_button %}
+            <a href="{% url 'eth-respond-to-make-deal-contract' pk=pk step=0 %}">
+{#                <button>Respond for {{ respond_operation_gas }} ETH</button>#}
+                <button>Respond</button>
+            </a>
+        {% endif %}
+
+        {% if show_accept_invitation_button %}
+            <a href="{% url 'eth-accept-invitation' pk=pk %}">
+                <button>
+{#                    <font color="green">Accept invitation for {{ accept_invitation_operation_gas }} ETH</font>#}
+                    <font color="green">Accept invitation</font>
+                </button>
+            </a>
+        {% endif %}
+
+        {% if execution_contract_pk is not None %}
+            <a href="{% url 'eth-execution-contract-info' pk=execution_contract_pk %}">
+                <button>To execution smart contract</button>
+            </a>
+        {% endif %}
+
+    {% endif %}
+{% endblock content %}

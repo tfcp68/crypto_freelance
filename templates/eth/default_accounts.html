@@ -1,0 +1,25 @@
+{% extends "base_eth.html" %}
+
+{% block content %}
+    <table class="center-screen">
+        <thead>
+        <tr>
+            <td><strong>Login</strong></td>
+            <td><strong>Password</strong></td>
+            <td><strong>ETH address</strong></td>
+            <td><strong>ETH secret</strong></td>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for account in account_data %}
+            <tr>
+                <td>{{ account.login }}</td>
+                <td>{{ account.password }}</td>
+                <td>{{ account.eth_address }}</td>
+                <td>{{ account.secret }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock content %}

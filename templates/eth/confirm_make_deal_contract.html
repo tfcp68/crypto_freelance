@@ -1,0 +1,66 @@
+{% extends "base_eth.html" %}
+
+{% block content %}
+    <h2>Your ETH address:</h2>
+    <p>{{ user_address }}</p>
+    <h2>Task:</h2>
+    <p>{{ task_text }}</p>
+    <h2>Task execution time:</h2>
+    <p>{{ task_execution_time }} ({{ task_execution_time_format_for_human }})</p>
+    <h1>Full contract price:</h1>
+    <table>
+        <tr>
+            <td>Price</td>
+            <td>{{ price }} {{ TOKEN_NAME }}</td>
+        </tr>
+        <tr>
+            <td>Security deposit({{ security_deposit_percent }}%)</td>
+            <td>{{ security_deposit_value }} {{ TOKEN_NAME }}</td>
+        </tr>
+        <tr>
+            <td>Marketplace commission (1%)</td>
+            <td>{{ marketplace_fee }} {{ TOKEN_NAME }}</td>
+        </tr>
+        <tr>
+            <td>Full price with commission</td>
+            <td>{{ total_price }} {{ TOKEN_NAME }}</td>
+        </tr>
+        <tr>
+            <td>Gas price</td>
+            <td>{{ gas_price }} ETH</td>
+        </tr>
+        <tr>
+            <td>Estimated gas amount</td>
+            <td>{{ estimated_gas_amount }}</td>
+        </tr>
+        <tr>
+            <td>Transaction gas price</td>
+            <td>{{ tx_gas_price }} ETH</td>
+        </tr>
+        <tr>
+            <td>Total cost</td>
+            <td>{{ total_price }} {{ TOKEN_NAME }} + {{ tx_gas_price }} ETH</td>
+        </tr>
+{#        <tr>#}
+{#            <td>{{ price_without_sd_value }}</td>#}
+{#            <td>{{ security_deposit_value }}</td>#}
+{#            <td>{{ price_for_work }}</td>#}
+{#            <td>{{ commission }}</td>#}
+{#            <td>{{ estimated_gas_count }}</td>#}
+{#            <td>{{ gas_price }}</td>#}
+{#            <td>{{ deploying_gas_price }}</td>#}
+{#            <td>{{ total_price }}</td>#}
+{#        </tr>#}
+    </table>
+    {#    <h2>Стоимость выполнения задачи:</h2>#}
+    {#    <p>{{ task_price }} + {{ commission }} (комисcия) = {{ total_price }} ETH</p>#}
+    {#    <h2>Обеспечительный платёж:</h2>#}
+    {#    <p>{{ security_deposit_value }} ETH ({{ security_deposit }}%)</p>#}
+
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit">Confirm</button>
+    </form>
+
+    <a href="{% url 'eth-new-make-deal-contract' %}">Decline</a>
+{% endblock content %}

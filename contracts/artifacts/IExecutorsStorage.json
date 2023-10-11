@@ -1,0 +1,188 @@
+{
+	"deploy": {
+		"VM:-": {
+			"linkReferences": {},
+			"autoDeployLib": true
+		},
+		"main:1": {
+			"linkReferences": {},
+			"autoDeployLib": true
+		},
+		"ropsten:3": {
+			"linkReferences": {},
+			"autoDeployLib": true
+		},
+		"rinkeby:4": {
+			"linkReferences": {},
+			"autoDeployLib": true
+		},
+		"kovan:42": {
+			"linkReferences": {},
+			"autoDeployLib": true
+		},
+		"goerli:5": {
+			"linkReferences": {},
+			"autoDeployLib": true
+		},
+		"Custom": {
+			"linkReferences": {},
+			"autoDeployLib": true
+		}
+	},
+	"data": {
+		"bytecode": {
+			"functionDebugData": {},
+			"generatedSources": [],
+			"linkReferences": {},
+			"object": "",
+			"opcodes": "",
+			"sourceMap": ""
+		},
+		"deployedBytecode": {
+			"functionDebugData": {},
+			"generatedSources": [],
+			"immutableReferences": {},
+			"linkReferences": {},
+			"object": "",
+			"opcodes": "",
+			"sourceMap": ""
+		},
+		"gasEstimates": null,
+		"methodIdentifiers": {
+			"addExecutor(address)": "1f5a0bbe",
+			"chooseExecutors(address[])": "7cb76386",
+			"getExecutors()": "ef09e78f",
+			"getNumExecutors()": "59ce34a0",
+			"returnDepositToRespondedExecutors(address,uint256,address)": "429145da",
+			"wasChosen(address)": "41f2c286",
+			"wasResponded(address)": "0bffbff1"
+		}
+	},
+	"abi": [
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "executor_address",
+					"type": "address"
+				}
+			],
+			"name": "addExecutor",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address[]",
+					"name": "chosen_executors",
+					"type": "address[]"
+				}
+			],
+			"name": "chooseExecutors",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "getExecutors",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "address",
+							"name": "executorAddress",
+							"type": "address"
+						},
+						{
+							"internalType": "bool",
+							"name": "wasChosen",
+							"type": "bool"
+						}
+					],
+					"internalType": "struct utils.ExecutorData[]",
+					"name": "",
+					"type": "tuple[]"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "getNumExecutors",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "exclude",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "deposit",
+					"type": "uint256"
+				},
+				{
+					"internalType": "contract IERC20",
+					"name": "token",
+					"type": "address"
+				}
+			],
+			"name": "returnDepositToRespondedExecutors",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "executor_address",
+					"type": "address"
+				}
+			],
+			"name": "wasChosen",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "executor_address",
+					"type": "address"
+				}
+			],
+			"name": "wasResponded",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		}
+	]
+}

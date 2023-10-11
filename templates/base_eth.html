@@ -1,0 +1,14 @@
+{% extends "base_generic.html" %}
+
+{% block topbar %}
+    <a href="{% url 'eth-index' %}">Marketplace</a>
+    <a href="{% url 'eth-actual-make-deal-contracts' %}">Actual deals</a>
+    <a href="{% url 'eth-actual-judgment-contracts' %}">Actual judgments</a>
+    <a href="{% url 'eth-new-make-deal-contract' %}">Make new deal</a>
+{% endblock topbar %}
+
+{% if request.user.is_authenticated %}
+{% block topbar_me %}
+    <a href="{% url 'eth-me' %}">Me</a>
+{% endblock topbar_me %}
+{% endif %}

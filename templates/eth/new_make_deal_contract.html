@@ -1,0 +1,9 @@
+{% extends "base_eth.html" %}
+
+{% block content %}
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Deploy smart contract</button>
+    </form>
+{% endblock content %}

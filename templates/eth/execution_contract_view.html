@@ -1,0 +1,125 @@
+{% extends "base_eth.html" %}
+
+{% block content %}
+    <h1>Smart contract address:</h1>
+    <p>{{ address }}</p>
+
+    <h1>Smart contract status:</h1>
+    <p>
+        {% if is_closed %}
+            <font color="#8b0000">Closed</font>
+        {% else %}
+            <font color="#006400">Opened</font>
+        {% endif %}
+    </p>
+
+    <h1>Created:</h1>
+    <p>{{ created_at }}</p>
+
+    <h1>Customer:</h1>
+    <p>
+        <a href="#">{{ customer }}</a>
+    </p>
+
+    <h1>Executor:</h1>
+    <p>
+        <a href="#">{{ executor }}</a>
+    </p>
+
+    <h1>Task:</h1>
+    <p>{{ task_data_text }}</p>
+
+    <h1>Task HASH:</h1>
+    <p>{{ task_data.sha256hashsum }}</p>
+
+    <h1>Remaining execution time:</h1>
+    <p>
+        {% if execution_time_left is None %}
+            Not started
+        {% elif execution_time_left.total_seconds == 0 %}
+            Execution ended
+        {% else %}
+            {{ execution_time_left }}
+        {% endif %}
+    </p>
+
+    {% if add_execution_time_form is not None %}
+        <h1>Add execution time:</h1>
+        <form action="{% url 'eth-add-execution-time' pk=pk %}" method="POST">
+            {% csrf_token %}
+            {{ add_execution_time_form.as_p }}
+
+            <button type="submit">Add for {{ add_execution_time_operation_gas }} (gas) ETH</button>
+        </form>
+    {% endif %}
+
+    {% if solution_data is not None and solution_data %}
+        <h1>Solutions:</h1>
+        <table>
+            <thead>
+            <tr>
+                <td>Text</td>
+                <td>HASH</td>
+                <td>Created</td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for text_, solution_ in solution_data %}
+                <tr>
+                    <td>{{ text_ }}</td>
+                    <td>{{ solution_.sha256hashsum }}</td>
+                    <td>{{ solution_.timestamp }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if add_solution_form is not None %}
+        <h1>Add solution:</h1>
+        <form action="{% url 'eth-add-solution' pk=pk %}" method="POST">
+            {% csrf_token %}
+            {{ add_solution_form.as_p }}
+            <button type="submit">Add solution for {{ add_solution_operation_gas }} (gas) ETH</button>
+        </form>
+    {% endif %}
+
+{#    {% if show_start_execution_button %}#}
+{#        <a href="{% url 'eth-start-execution' pk=pk %}">#}
+{#            <button>Start execution for {{ start_execution_operation_gas }} (gas) ETH</button>#}
+{#        </a>#}
+{#    {% endif %}#}
+
+    {% if show_finish_execution_button %}
+        <a href="{% url 'eth-finish-execution' pk=pk %}">
+            <button>Finish execution for {{ finish_execution_operation_gas }} (gas) ETH</button>
+        </a>
+    {% endif %}
+
+    {% if show_accept_solution_button %}
+        <a href="{% url 'eth-accept-solution' pk=pk %}">
+            <button>
+                <font color="#006400">
+                    Accept solution for {{ accept_solution_operation_gas }} (gas) ETH
+                </font>
+            </button>
+        </a>
+        <a href="{% url 'eth-deny-solution' pk=pk %}">
+            <button>
+                <font color="#8b0000">
+                    Deny solution for {{ deny_solution_operation_gas }} (gas) ETH
+                </font>
+            </button>
+        </a>
+    {% endif %}
+
+    <a href="{% url 'eth-make-deal-contract-info' pk=make_deal_pk %}">
+        <button>To make deal smart contract</button>
+    </a>
+
+    {% if judgment_pk is not None %}
+        <a href="{% url 'eth-judgment-contract-info' pk=judgment_pk %}">
+            <button>To judgment smart contract</button>
+        </a>
+    {% endif %}
+{% endblock content %}

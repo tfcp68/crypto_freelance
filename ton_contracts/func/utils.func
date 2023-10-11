@@ -1,0 +1,59 @@
+#pragma version >0.4;
+
+#include "./stdlib.func";
+
+cell utils::build_address_cell(int workchain, int addr_hash) {
+    return begin_cell()
+           .store_uint(2, 2)
+           .store_uint(0, 1)
+           .store_int(workchain, 8)
+           .store_uint(addr_hash, 256)
+           .end_cell();
+}
+
+cell utils::extract_address(cell in_msg_full) {
+    slice msgs = in_msg_full.begin_parse();
+    var flags = msgs~load_uint(4);
+    slice addr = msgs~load_msg_addr();
+    (int workchain, int addr_hash) = addr.parse_std_addr();
+    return utils::build_address_cell(workchain, addr_hash);
+}
+
+int utils::addresses_equal?(cell addr1, cell addr2) {
+    return (addr1.cell_hash() == addr2.cell_hash());
+}
+
+int utils::minutes(int t) {
+    return t * 60;
+}
+
+int utils::hours(int t) {
+    return t * utils::minutes(60);
+}
+
+int utils::days(int t) {
+    return t * utils::hours(24);
+}
+
+int utils::weeks(int t) {
+    return t * utils::days(7);
+}
+
+int utils::months(int t) {
+    ;; 30 days in month!
+    return t * utils::days(30);
+}
+
+const int utils::CARRY_ALL_BALANCE = 128;
+const int utils::DESTROY_IF_ZERO = 32;
+
+() utils::transfer(slice to, int amount, int mode) {
+    cell msg = begin_cell()
+        .store_uint(0x18, 6)
+        .store_slice(to)
+        .store_coins(amount)
+        .store_uint(0, 107)
+    .end_cell();
+    
+    send_raw_message(msg, mode);
+}

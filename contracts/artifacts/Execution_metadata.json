@@ -1,0 +1,286 @@
+{
+	"compiler": {
+		"version": "0.8.17+commit.8df45f5f"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "task_info_contract_address",
+						"type": "address"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "bool",
+						"name": "isAccepted",
+						"type": "bool"
+					},
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "judgmentContractAddress",
+						"type": "address"
+					}
+				],
+				"name": "Closed",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					}
+				],
+				"name": "ExecutionFinished",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "timeLeft",
+						"type": "uint256"
+					}
+				],
+				"name": "ExecutionStarted",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					}
+				],
+				"name": "SolutionUpdated",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "executionTimeEnd",
+						"type": "uint256"
+					}
+				],
+				"name": "TimeExtended",
+				"type": "event"
+			},
+			{
+				"inputs": [],
+				"name": "acceptSolution",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "additional_time",
+						"type": "uint256"
+					}
+				],
+				"name": "addExecutionTime",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "solution_id",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "solution_sha256hashsum",
+						"type": "bytes32"
+					}
+				],
+				"name": "addSolution",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "close",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "judgment_time",
+						"type": "uint256"
+					}
+				],
+				"name": "denySolution",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "finishExecution",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getExecutionTimeEnd",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getMakeDealContractAddress",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getTaskInfoContractAddress",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/Execution.sol": "Execution"
+		},
+		"evmVersion": "london",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"@openzeppelin/contracts/token/ERC20/IERC20.sol": {
+			"keccak256": "0x9750c6b834f7b43000631af5cc30001c5f547b3ceb3635488f140f60e897ea6b",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://5a7d5b1ef5d8d5889ad2ed89d8619c09383b80b72ab226e0fe7bde1636481e34",
+				"dweb:/ipfs/QmebXWgtEfumQGBdVeM6c71McLixYXQP5Bk6kKXuoY4Bmr"
+			]
+		},
+		"contracts/Execution.sol": {
+			"keccak256": "0x5daeddbf3fe9c5768c85377291af52ff74824925547dd1bf07d6ee730995962b",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://604cf7bc74c400d368ba22869451d75f12edbecbfc8566d28846e8b0a08735b1",
+				"dweb:/ipfs/QmfBEFmC5sApv4AKF7TKY1KGnkN2exddY2SpeTaxa9Nhg1"
+			]
+		},
+		"contracts/IExecution.sol": {
+			"keccak256": "0x162891db61dd39f9d228cd807b67efa3b4f0c9f4881aff435f2bf894c2ed68cc",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://f34feda88b97c47fc5a6570723b883b64a79a501d99ac4736287cc84b40bdbfe",
+				"dweb:/ipfs/Qme9outK8zJoopcof1CFzD4U7ErK3R9FozPeoJJwTePimW"
+			]
+		},
+		"contracts/IMakeDeal.sol": {
+			"keccak256": "0x2bb8ec88ddf341de870f4fcb2c274f45fad6cae7aca33888287cf1aa3314b0ae",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://deee596b0816a893e5d716780d2d7998c5f9d85bd7cfec667c1621c09337e1e5",
+				"dweb:/ipfs/QmbDN5B2kBqssFXLUejKgUoh73qzyzZStj4aGDAfS54NQc"
+			]
+		},
+		"contracts/ITaskInfo.sol": {
+			"keccak256": "0x642c3889162019bd6a5739631c5835c67ac592457212b7e72d9da235086fa357",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://694bfb9cb05741e1e38aa84fa74e9aaed683e5fa488a2634db59f0c988c93193",
+				"dweb:/ipfs/QmNrsiSfbo62qdbCwT2cNrZcpeRHpLEiU296HBCRmJWxub"
+			]
+		},
+		"contracts/Judgment.sol": {
+			"keccak256": "0xbfc1b52023428848cf405fa167b630498ebd72f313f1c370d9884ea9e16d2b94",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://b51ddca841a409548308a13d62e0958ade84ab279473a4b74ca633285452f87e",
+				"dweb:/ipfs/QmXX3hoahYfrb627nqmK3DhT3jWvid5SobAcAyoK9mDXXK"
+			]
+		},
+		"contracts/utils.sol": {
+			"keccak256": "0x8c6c150b5f08817349111b9ba705905ae3112231679057666b590a124129045e",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://4ee3032ccce6ec3449411d50121ffbefc0117899cc4f24657c7b40f16810925a",
+				"dweb:/ipfs/QmTrzutQUDffJsYHKWFXuvGwbrLkbUCDUhQP6pxwaoa4hX"
+			]
+		}
+	},
+	"version": 1
+}

@@ -1,0 +1,82 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+    <form id="redirect-form" method="POST" action="{% url 'eth-sign-tx' %}">
+        <input type="hidden" name="sign_type"/>
+        <input type="hidden" name="tx_hash" />
+        <input type="hidden" name="redirect_to" />
+    </form>
+    <script lang="text/javascript">
+        window.onload = on_load;
+
+        async function on_load() {
+            let form = document.getElementById("redirect-form");
+
+            await connectNetwork();
+
+            const txParams = getTxParams();
+            console.log(txParams);
+
+            let txHash;
+
+            try {
+                txHash = await ethereum.request({
+                    method: "eth_sendTransaction",
+                    params: [txParams],
+                });
+            } catch (error) {
+                console.log("error:", error);
+                form.setAttribute("action", "{% url 'eth-something-went-wrong' %}");
+                form.submit();
+                return;
+            }
+
+            console.log("txHash:", txHash);
+            const str_hash = JSON.stringify(txHash);
+
+            const searchParams = new URLSearchParams(window.location.search);
+            const sign_type = searchParams.get("sign_type");
+            const redirect_to = searchParams.get("redirect_to");
+
+            inputs = form.getElementsByTagName("input");
+            inputs.item(0).value = sign_type;
+            inputs.item(1).value = str_hash;
+            if (redirect_to !== null) {
+                inputs.item(2).value = redirect_to;
+            }
+            form.submit();
+        }
+
+        function getTxParams() {
+            // txInput = document.getElementById("txInput");
+            // value = txInput.getAttribute("value");
+            // txParams = JSON.parse(value);
+            // txParams[from] = ethereum.selectedAddress;
+            // return txParams;
+            return {
+                nonce: '{{ tx.nonce }}',
+                gasPrice: '{{ tx.gasPrice }}',
+                gas: '{{ tx.gas }}',
+                {% if tx.to %}
+                    to: '{{ tx.to }}',
+                {% endif %}
+                from: ethereum.selectedAddress,
+                value: '{{ tx.value }}',
+                data: '{{ tx.data }}',
+                chainId: '{{ tx.chainId }}',
+            };
+        }
+
+        async function connectNetwork() {
+            try {
+                await ethereum.request({
+                    method: "eth_requestAccounts"
+                });
+            } catch (error) {
+                console.log("Connection error:", error);
+                form.setAttribute("action", "{% url 'eth-something-went-wrong' %}");
+                form.submit();
+            }
+        }
+    </script>
+{% endblock content %}

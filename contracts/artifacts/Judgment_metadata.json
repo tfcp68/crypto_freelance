@@ -1,0 +1,358 @@
+{
+	"compiler": {
+		"version": "0.8.18+commit.87f61d96"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "task_info_contract_address",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "judgment_time",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "from",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					}
+				],
+				"name": "ArgumentAdded",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "address",
+						"name": "judge",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					}
+				],
+				"name": "Voted",
+				"type": "event"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "argument_id",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "argument_sha256sum",
+						"type": "bytes32"
+					}
+				],
+				"name": "addArgument",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "sender",
+						"type": "address"
+					}
+				],
+				"name": "checkCanSenderVote",
+				"outputs": [],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "close",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getCustomerArguments",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "uint256",
+								"name": "id",
+								"type": "uint256"
+							},
+							{
+								"internalType": "bytes32",
+								"name": "sha256hashsum",
+								"type": "bytes32"
+							},
+							{
+								"internalType": "uint256",
+								"name": "timestamp",
+								"type": "uint256"
+							}
+						],
+						"internalType": "struct utils.Argument[]",
+						"name": "",
+						"type": "tuple[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getExecutionContractAddress",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getExecutorArguments",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "uint256",
+								"name": "id",
+								"type": "uint256"
+							},
+							{
+								"internalType": "bytes32",
+								"name": "sha256hashsum",
+								"type": "bytes32"
+							},
+							{
+								"internalType": "uint256",
+								"name": "timestamp",
+								"type": "uint256"
+							}
+						],
+						"internalType": "struct utils.Argument[]",
+						"name": "",
+						"type": "tuple[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getJudgmentTimeEnd",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getNumVotes",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getTaskInfoContractAddress",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "getVotes",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "uint256",
+								"name": "id",
+								"type": "uint256"
+							},
+							{
+								"internalType": "bytes32",
+								"name": "sha256hashsum",
+								"type": "bytes32"
+							},
+							{
+								"internalType": "uint256",
+								"name": "timestamp",
+								"type": "uint256"
+							},
+							{
+								"internalType": "bool",
+								"name": "verdict",
+								"type": "bool"
+							},
+							{
+								"internalType": "address",
+								"name": "judgeAddress",
+								"type": "address"
+							}
+						],
+						"internalType": "struct utils.JudgeVote[]",
+						"name": "",
+						"type": "tuple[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "isClosed",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bool",
+						"name": "verdict",
+						"type": "bool"
+					},
+					{
+						"internalType": "uint256",
+						"name": "vote_id",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "vote_sha256hashsum",
+						"type": "bytes32"
+					}
+				],
+				"name": "vote",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"Judgment.sol": "Judgment"
+		},
+		"evmVersion": "paris",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": true,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"@openzeppelin/contracts/token/ERC20/IERC20.sol": {
+			"keccak256": "0x9750c6b834f7b43000631af5cc30001c5f547b3ceb3635488f140f60e897ea6b",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://5a7d5b1ef5d8d5889ad2ed89d8619c09383b80b72ab226e0fe7bde1636481e34",
+				"dweb:/ipfs/QmebXWgtEfumQGBdVeM6c71McLixYXQP5Bk6kKXuoY4Bmr"
+			]
+		},
+		"IExecution.sol": {
+			"keccak256": "0x162891db61dd39f9d228cd807b67efa3b4f0c9f4881aff435f2bf894c2ed68cc",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://f34feda88b97c47fc5a6570723b883b64a79a501d99ac4736287cc84b40bdbfe",
+				"dweb:/ipfs/Qme9outK8zJoopcof1CFzD4U7ErK3R9FozPeoJJwTePimW"
+			]
+		},
+		"ITaskInfo.sol": {
+			"keccak256": "0x642c3889162019bd6a5739631c5835c67ac592457212b7e72d9da235086fa357",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://694bfb9cb05741e1e38aa84fa74e9aaed683e5fa488a2634db59f0c988c93193",
+				"dweb:/ipfs/QmNrsiSfbo62qdbCwT2cNrZcpeRHpLEiU296HBCRmJWxub"
+			]
+		},
+		"Judgment.sol": {
+			"keccak256": "0xffd7296f2a28324c42f074d40fe1d540973df2ee31d08ae6109acd386946dc91",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://1fc7f90b3baae9b79e43bfa4d3c2ab5e6cf3b9fd57bb7de9f2395eef426dc20f",
+				"dweb:/ipfs/QmawhtrdWBkpqD3YQK7LtoYDGGySCU8jjAungk1Mip1em6"
+			]
+		},
+		"utils.sol": {
+			"keccak256": "0x8c6c150b5f08817349111b9ba705905ae3112231679057666b590a124129045e",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://4ee3032ccce6ec3449411d50121ffbefc0117899cc4f24657c7b40f16810925a",
+				"dweb:/ipfs/QmTrzutQUDffJsYHKWFXuvGwbrLkbUCDUhQP6pxwaoa4hX"
+			]
+		}
+	},
+	"version": 1
+}

@@ -1,0 +1,29 @@
+{% extends "base_eth.html" %}
+
+{% block content %}
+    <h1>ETH address:</h1>
+    <p>{{ eth_address }}</p>
+
+    <h1>Balance:</h1>
+    <p>{{ balance }} ETH</p>
+
+    <a href="{% url 'eth-owned-make-deal-contracts' %}">
+        <h1>My owned deals</h1>
+    </a>
+
+    <a href="{% url 'eth-owned-execution-contracts' %}">
+        <h1>My owned execution smart contracts</h1>
+    </a>
+
+    <a href="{% url 'eth-owned-judgment-contracts' %}">
+        <h1>My owned judgment smart contracts</h1>
+    </a>
+
+    <a href="{% url 'eth-i-execute' %}">
+        <h1>I execute</h1>
+    </a>
+
+    <a href="{% url 'eth-i-judge' %}">
+        <h1>I judge</h1>
+    </a>
+{% endblock content %}

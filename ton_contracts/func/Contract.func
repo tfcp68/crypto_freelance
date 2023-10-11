@@ -1,0 +1,1203 @@
+#pragma version >0.4;
+
+#include "./stdlib.func";
+#include "./list.func";
+#include "./utils.func";
+
+const slice COMPANY_ADDRESS = "EQBR_wYwM3ekeRHKAxC3ELZjD6cXlbrII09qYywMK1G_KISC"a;
+const int COMPANY_PERCENT = 1;
+
+;; THRESHOLDS
+const int MIN_CONTRACT_PRICE = 1000000000; ;; 1 TON
+const int MIN_TASK_EXECUTION_TIME = 60; ;; 1 minute
+const int MIN_JUDGMENT_TIME = 60; ;; 1 minute
+
+;; SIZES
+const int SIZE_VOTE = 2;
+const int SIZE_STATE = 4;
+const int SIZE_PERCENT = 8;
+const int SIZE_OP = 16;
+const int SIZE_STATUS = 16;
+const int SIZE_TIME = 32;
+const int SIZE_QUANTITY = 32;
+const int SIZE_COIN = 120;
+const int SIZE_ID = 256;
+const int SIZE_HASH = 256;
+
+;; STATES
+const int STATE_NULL = 0;
+const int STATE_MAKE_DEAL = 1;
+const int STATE_EXECUTION = 2;
+const int STATE_CLOSED = 3;
+const int STATE_JUDGMENT = 4;
+const int STATE_CLOSED_AFTER_JUDGMENT = 5;
+
+;; STATUS CODES
+const int STATUS_OK = 0;
+const int STATUS_ALREADY_CONSTRUCTED = 0x1001;
+const int STATUS_MESSAGE_ERROR = 0x1002;
+const int STATUS_ACCESS_DENIED = 0x1003;
+const int STATUS_UNKNOWN_METHOD = 0x1004;
+const int STATUS_TOO_LOW_CONTRACT_PRICE = 0x1005;
+const int STATUS_TOO_LOW_TASK_EXECUTION_TIME = 0x1006;
+const int STATUS_TOO_LOW_JUDGMENT_TIME = 0x1007;
+const int STATUS_ALREADY_RESPONDED = 0x1008;
+const int STATUS_VALUE_ERROR = 0x1009;
+const int STATUS_ALREADY_VOTED = 0x1010;
+const int STATUS_WRONG_STATE = 0x1011;
+
+;; OPERATORS
+const int OP_CONSTRUCTOR = 0;
+const int OP_ADD_TASK_EXECUTION_TIME = 1;
+
+;; make deal operators
+const int OP_RESPOND = 2;
+const int OP_CHOOSE_EXECUTORS = 3;
+const int OP_ACCEPT_INVITATION = 4;
+
+;; execution operators
+const int OP_ADD_SOLUTION = 5;
+const int OP_FINISH_EXECUTION = 6;
+const int OP_ACCEPT_SOLUTION = 7;
+const int OP_DECLINE_SOLUTION = 8;
+
+;; judgment operators
+const int OP_ADD_ARGUMENT = 9;
+const int OP_VOTE = 10;
+const int OP_CLOSE_JUDGMENT = 11;
+
+;; CELL FORMATS
+
+;; address_cell <- ./utils.func/utils::build_address_cell
+
+;; text_data_cell
+;;      SIZE_ID id
+;;      SIZE_HASH sha256sum
+;;      SIZE_TIME timestamp
+
+;; vote_cell <- text_data_cell
+;;      SIZE_VOTE vote              ;; -1 -- for customer, 0 -- for executor
+;;      address_cell judge address
+
+;; ATTRIBUTES
+
+;; SIZE_STATE contract state
+;; SIZE_COIN price
+;; SIZE_COIN security deposit
+;; SIZE_TIME task execution time
+;; cell customer data:
+;;      address_cell customer address
+;;      text_data_cell task data
+;; cell executor data:
+;;      address_cell executor address
+;;      list<text_data_cell> solution data
+;; cell state data
+
+;; STATE DATA FORMATS
+
+;; make deal
+;; list<address_cell> potential executors
+;; list<address_cell> chosen executors
+
+;; execution
+;; SIZE_TIME execution time end
+
+;; judgment
+;; SIZE_TIME judgment time end
+;; list<text_data_cell> customer arguments
+;; list<text_data_cell> executor arguments
+;; list<vote_cell> judge votes
+;; list<address_cell> judges
+
+_ load_data();
+
+() save_data(
+    int state, int price, int security_deposit, int task_execution_time,
+    cell customer_data, cell executor_data, cell state_data
+) impure;
+
+() op_constructor(slice msg, cell sender, int value) impure;
+
+() op_add_task_execution_time(slice msg, cell sender) impure;
+
+() op_respond(cell sender, int value) impure;
+
+() op_choose_executors(slice msg, cell sender) impure;
+
+() op_accept_invitation(cell sender) impure;
+
+() op_add_solution(slice msg, cell sender) impure;
+
+() op_finish_execution(cell sender) impure;
+
+() op_accept_solution(cell sender) impure;
+
+() op_decline_solution(slice msg, cell sender) impure;
+
+() op_add_argument(slice msg, cell sender) impure;
+
+() op_vote(slice msg, cell sender, int value) impure;
+
+() op_close_judgment(cell sender) impure;
+
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    if (in_msg_body.slice_empty?()) {
+        return ();
+    }
+
+    cell sender_cell = utils::extract_address(in_msg_full);
+
+    throw_if(STATUS_MESSAGE_ERROR, in_msg_body.slice_bits() < SIZE_OP);
+
+    int op = in_msg_body~load_uint(SIZE_OP);
+
+    cell sender = utils::extract_address(in_msg_full);
+
+    if (op == OP_CONSTRUCTOR) {
+        ;; msg format
+        ;; SIZE_PERCENT security deposit percent
+        ;; SIZE_TIME task execution time
+        ;; text_data_cell task data
+        return op_constructor(in_msg_body, sender, msg_value);
+    }
+
+    if (op == OP_ADD_TASK_EXECUTION_TIME) {
+        ;; msg format
+        ;; SIZE_TIME additional time
+        return op_add_task_execution_time(in_msg_body, sender);
+    }
+
+    if (op == OP_RESPOND) {
+        return op_respond(sender, msg_value);
+    }
+
+    if (op == OP_CHOOSE_EXECUTORS) {
+        ;; msg format
+        ;; list<address_cell> chosen executors
+        return op_choose_executors(in_msg_body, sender);
+    }
+
+    if (op == OP_ACCEPT_INVITATION) {
+        return op_accept_invitation(sender);
+    }
+
+    if (op == OP_ADD_SOLUTION) {
+        ;; msg format
+        ;; text_data_cell solution
+        return op_add_solution(in_msg_body, sender);
+    }
+
+    if (op == OP_FINISH_EXECUTION) {
+        return op_finish_execution(sender);
+    }
+
+    if (op == OP_ACCEPT_SOLUTION) {
+        return op_accept_solution(sender);
+    }
+
+    if (op == OP_DECLINE_SOLUTION) {
+        ;; msg format
+        ;; SIZE_TIME judgment time
+        return op_decline_solution(in_msg_body, sender);
+    }
+
+    if (op == OP_ADD_ARGUMENT) {
+        ;; msg format
+        ;; text_data_cell argument data
+        return op_add_argument(in_msg_body, sender);
+    }
+
+    if (op == OP_VOTE) {
+        ;; msg format
+        ;; text_data_cell vote_base
+        ;; SIZE_VOTE vote
+        return op_vote(in_msg_body, sender, msg_value);
+    }
+
+    if (op == OP_CLOSE_JUDGMENT) {
+        return op_close_judgment(sender);
+    }
+
+    throw(STATUS_UNKNOWN_METHOD);
+}
+
+int __get_state();
+
+int __check_constructor_msg_size(slice msg);
+
+int __pay_company_percent(int value);
+
+int __check_text_data_cell_size(cell text_data_cell);
+
+() op_constructor(slice msg, cell sender, int value) impure {
+    throw_if(STATUS_ALREADY_CONSTRUCTED, __get_state() != STATE_NULL);
+
+    throw_if(STATUS_MESSAGE_ERROR, ~ __check_constructor_msg_size(msg));
+
+    throw_if(STATUS_TOO_LOW_CONTRACT_PRICE, value < MIN_CONTRACT_PRICE);
+
+    int security_deposit_percent = msg~load_uint(SIZE_PERCENT);
+
+    throw_if(STATUS_MESSAGE_ERROR, (security_deposit_percent < 0) | (security_deposit_percent >= 100));
+
+    int price = __pay_company_percent(value);
+
+    int security_deposit = price / 100 * security_deposit_percent;
+
+    int task_execution_time = msg~load_uint(SIZE_TIME);
+
+    throw_if(STATUS_TOO_LOW_TASK_EXECUTION_TIME, task_execution_time < MIN_TASK_EXECUTION_TIME);
+
+    cell task_data = msg~load_ref();
+
+    throw_if(STATUS_MESSAGE_ERROR, ~ __check_text_data_cell_size(task_data));
+
+    cell customer_data = begin_cell()
+                         .store_ref(sender)
+                         .store_ref(task_data)
+                         .end_cell();
+    
+    cell executor_data = begin_cell()
+                         .store_ref(begin_cell().end_cell()) ;; executor address
+                         .store_ref(begin_cell().end_cell()) ;; solution data
+                         .end_cell();
+        
+    cell state_data = begin_cell()
+                      .store_ref(begin_cell().end_cell()) ;; potential executors
+                      .store_ref(begin_cell().end_cell()) ;; chosen executors
+                      .end_cell();
+
+    save_data(
+        STATE_MAKE_DEAL, price, security_deposit, task_execution_time,
+        customer_data, executor_data, state_data
+    );
+}
+
+int __get_state() {
+    slice data_slice = get_data().begin_parse();
+    int state = data_slice~load_uint(SIZE_STATE);
+    return state;
+}
+
+int __check_constructor_msg_size(slice msg) {
+    return ~ (
+        (msg.slice_bits() != (SIZE_PERCENT + SIZE_TIME)) &
+        (msg.slice_refs() != 1)
+    );
+}
+
+int __pay_company_percent(int value) {
+    int price = value / (100 + COMPANY_PERCENT) * 100;
+    int company_percent = value - price;
+    utils::transfer(COMPANY_ADDRESS, company_percent, utils::DESTROY_IF_ZERO);
+    return price;
+}
+
+int __check_text_data_cell_size(cell text_data_cell) {
+    return text_data_cell.begin_parse().slice_bits() == (SIZE_ID + SIZE_HASH + SIZE_TIME);
+}
+
+int __is_sender_customer(cell sender);
+
+cell __add_task_execution_time_to_state_data(int additional_time, cell state_data);
+
+() op_add_task_execution_time(slice msg, cell sender) impure {
+    throw_if(STATUS_WRONG_STATE, __get_state() >= STATE_CLOSED);
+
+    throw_if(STATUS_MESSAGE_ERROR, msg.slice_bits() < 32);
+
+    throw_if(STATUS_ACCESS_DENIED, ~ __is_sender_customer(sender));
+
+    int additional_time = msg~load_uint(SIZE_TIME);
+
+    (
+        int state, int price, int security_deposit, int task_execution_time,
+        cell customer_data, cell executor_data, cell state_data
+    ) = load_data();
+
+    int new_task_execution_time = task_execution_time + additional_time;
+
+    cell new_state_data = __add_task_execution_time_to_state_data(additional_time, state_data);
+
+    save_data(
+        state, price, security_deposit, new_task_execution_time,
+        customer_data, executor_data, new_state_data
+    );
+}
+
+int __is_sender_customer(cell sender) {
+    (
+        int state, int price, int security_deposit, int task_execution_time,
+        cell customer_data, cell executor_data, cell state_data
+    ) = load_data();
+
+    slice customer_data_slice = customer_data.begin_parse();
+    cell customer = customer_data_slice~load_ref();
+
+    return utils::addresses_equal?(sender, customer);
+}
+
+cell __add_task_execution_time_to_state_data(int additional_time, cell state_data) {
+    if (__get_state() != STATE_EXECUTION) {
+        return state_data;
+    }
+
+    slice state_data_slice = state_data.begin_parse();
+
+    int execution_time_end = state_data_slice~load_uint(SIZE_TIME);
+    int now = now();
+
+    int new_execution_time_end = now + additional_time;
+    if (now < execution_time_end) {
+        new_execution_time_end = execution_time_end + additional_time;
+    }
+
+    return begin_cell()
+           .store_uint(new_execution_time_end, SIZE_TIME)
+           .end_cell();
+}
+
+() op_respond(cell sender, int value) impure {
+    ;; TODO: respond >= security deposit
+    throw_if(STATUS_WRONG_STATE, __get_state() != STATE_MAKE_DEAL);
+
+    throw_if(STATUS_ACCESS_DENIED, __is_sender_customer(sender));
+
+    (
+        int state, int price, int security_deposit, int task_execution_time,
+        cell customer_data, cell executor_data, cell state_data
+    ) = load_data();
+
+    slice state_data_slice = state_data.begin_parse();
+
+    cell potential_executors = state_data_slice~load_ref();
+    cell chosen_executors = state_data_slice~load_ref();
+
+    throw_if(STATUS_ALREADY_RESPONDED, potential_executors.list_contains?(sender));
+
+    potential_executors~list_push(sender);
+
+    cell new_state_data = begin_cell()
+                          .store_ref(potential_executors)
+                          .store_ref(chosen_executors)
+                          .end_cell();
+
+    save_data(
+        state, price, security_deposit, task_execution_time,
+        customer_data, executor_data, new_state_data
+    );
+}
+
+() op_choose_executors(slice msg, cell sender) impure {
+    throw_if(STATUS_WRONG_STATE, __get_state() != STATE_MAKE_DEAL);
+
+    throw_if(STATUS_MESSAGE_ERROR, msg.slice_refs() == 0);
+
+    throw_if(STATUS_ACCESS_DENIED, ~ __is_sender_customer(sender));
+
+    cell new_chosen_executors = msg~load_ref();
+
+    (
+        int state, int price, int security_deposit, int task_execution_time,
+        cell customer_data, cell executor_data, cell state_data
+    ) = load_data();
+
+    slice state_data_slice = state_data.begin_parse();
+    cell potential_executors = state_data_slice~load_ref();
+    cell chosen_executors = state_data_slice~load_ref();
+
+    while ~(new_chosen_executors.list_empty?()) {
+        cell chosen_executor = new_chosen_executors~list_pop();
+        if ~(chosen_executors.list_contains?(chosen_executor)) {
+            chosen_executors~list_push(chosen_executor);
+        }
+    }
+
+    cell new_state_data = begin_cell()
+                          .store_ref(potential_executors)
+                          .store_ref(chosen_executors)
+                          .end_cell();
+
+    save_data(
+        state, price, security_deposit, task_execution_time,
+        customer_data, executor_data, new_state_data
+    );
+}
+
+() __return_stakes_to_potential_executors(cell executors_list, int stake, cell exclude);
+
+() __execution_constructor(cell executor) impure;
+
+() op_accept_invitation(cell sender) impure {
+    throw_if(STATUS_WRONG_STATE, __get_state() != STATE_MAKE_DEAL);
+
+    throw_if(STATUS_ACCESS_DENIED, __is_sender_customer(sender));
+
+    (
+        int state, int price, int security_deposit, int task_execution_time,
+        cell customer_data, cell executor_data, cell state_data
+    ) = load_data();
+
+    slice state_data_slice = state_data.begin_parse();
+    cell potential_executors = state_data_slice~load_ref();
+    cell chosen_executors = state_data_slice~load_ref();
+
+    throw_if(STATUS_ACCESS_DENIED, ~(chosen_executors.list_contains?(sender)));
+
+    __return_stakes_to_potential_executors(potential_executors, security_deposit, sender);
+
+    __execution_constructor(sender);
+}
+
+() __return_stakes_to_potential_executors(cell executors_list, int stake, cell exclude) {
+    while ~ (executors_list.list_empty?()) {
+        cell executor = executors_list~list_pop();
+        if ~ (utils::addresses_equal?(executor, exclude)) {
+            utils::transfer(executor.begin_parse(), stake, utils::DESTROY_IF_ZERO);
+        }
+    }
+}
+
+() __execution_constructor(cell executor) impure {
+    (
+        int state, int price, int security_deposit, int task_execution_time,
+        cell customer_data, cell executor_data, cell state_data
+    ) = load_data();
+
+    cell new_executor_data = begin_cell()
+                             .store_ref(executor)
+                             .store_ref(begin_cell().end_cell())
+                             .end_cell();
+
+    cell new_state_data = begin_cell()
+                          .store_uint(now() + task_execution_time, SIZE_TIME)
+                          .end_cell();
+    
+    save_data(
+        STATE_EXECUTION, price, security_deposit, task_execution_time,
+        customer_data, new_executor_data, new_state_data
+    );
+}
+
+int __is_sender_executor(cell sender);
+
+() op_add_solution(slice msg, cell sender) impure {
+    throw_if(STATUS_WRONG_STATE, __get_state() != STATE_EXECUTION);
+
+    throw_if(STATUS_ACCESS_DENIED, ~ __is_sender_executor(sender));
+
+    cell solution = msg~load_ref();
+    
+    throw_if(STATUS_MESSAGE_ERROR, ~ __check_text_data_cell_size(solution));
+
+    (
+        int state, int price, int security_deposit, int task_execution_time,
+        cell customer_data, cell executor_data, cell state_data
+    ) = load_data();
+
+    slice state_data_slice = state_data.begin_parse();
+    int execution_time_end = state_data_slice~load_uint(SIZE_TIME);
+
+    throw_if(STATUS_ACCESS_DENIED, execution_time_end <= now());
+
+    slice executor_data_slice = executor_data.begin_parse();
+    cell executor = executor_data_slice~load_ref();
+    cell solution_data = executor_data_slice~load_ref();
+
+    solution_data~list_push(solution);
+
+    cell new_executor_data = begin_cell()
+                             .store_ref(executor)
+                             .store_ref(solution_data)
+                             .end_cell();
+    
+    save_data(
+        state, price, security_deposit, task_execution_time,
+        customer_data, new_executor_data, state_data
+    );
+}
+
+int __is_sender_executor(cell sender) {
+    (
+        int state, int price, int security_deposit, int task_execution_time,
+        cell customer_data, cell executor_data, cell state_data
+    ) = load_data();
+
+    slice executor_data_slice = executor_data.begin_parse();
+    cell executor = executor_data_slice~load_ref();
+
+    return (utils::addresses_equal?(sender, executor));
+}
+
+() op_finish_execution(cell sender) impure {
+    throw_if(STATUS_WRONG_STATE, __get_state() != STATE_EXECUTION);
+
+    throw_if(STATUS_ACCESS_DENIED, ~ __is_sender_executor(sender));
+
+    (
+        int state, int price, int security_deposit, int task_execution_time,
+        cell customer_data, cell executor_data, cell state_data
+    ) = load_data();
+
+    slice state_data_slice = state_data.begin_parse();
+    int execution_time_end = state_data_slice~load_uint(SIZE_TIME);
+
+    throw_if(STATUS_ACCESS_DENIED, execution_time_end <= now());
+
+    slice executor_data_slice = executor_data.begin_parse();
+    cell executor = executor_data_slice~load_ref();
+    cell solution_data = executor_data_slice~load_ref();
+
+    throw_if(STATUS_ACCESS_DENIED, solution_data.list_empty?());
+
+    int time_now = now() - 1;
+
+    cell new_state_data = begin_cell()
+                          .store_uint(time_now, SIZE_TIME)
+                          .end_cell();
+    
+    save_data(
+        state, price, security_deposit, task_execution_time,
+        customer_data, executor_data, new_state_data
+    );
+}
+
+() __pay_for_work();
+
+() op_accept_solution(cell sender) impure {
+    throw_if(STATUS_WRONG_STATE, __get_state() != STATE_EXECUTION);
+
+    throw_if(STATUS_ACCESS_DENIED, ~ __is_sender_customer(sender));
+
+    (
+        int state, int price, int security_deposit, int task_execution_time,
+        cell customer_data, cell executor_data, cell state_data
+    ) = load_data();
+
+    slice state_data_slice = state_data.begin_parse();
+    int execution_time_end = state_data_slice~load_uint(SIZE_TIME);
+
+    throw_if(STATUS_ACCESS_DENIED, now() <= execution_time_end);
+
+    cell new_state_data = begin_cell().end_cell();
+
+    __pay_for_work();
+
+    save_data(
+        STATE_CLOSED, price, security_deposit, task_execution_time,
+        customer_data, executor_data, new_state_data
+    );
+}
+
+() __pay_for_work() {
+    (
+        int state, int price, int security_deposit, int task_execution_time,
+        cell customer_data, cell executor_data, cell state_data
+    ) = load_data();
+
+    slice executor_data_slice = executor_data.begin_parse();
+    cell executor = executor_data_slice~load_ref();
+
+    utils::transfer(executor.begin_parse(), price + 2 * security_deposit, utils::DESTROY_IF_ZERO);
+}
+
+() __judgment_constructor(int judgment_time) impure;
+
+() op_decline_solution(slice msg, cell sender) impure {
+    throw_if(STATUS_WRONG_STATE, __get_state() != STATE_EXECUTION);
+
+    throw_if(STATUS_ACCESS_DENIED, ~ __is_sender_customer(sender));
+
+    throw_if(STATUS_MESSAGE_ERROR, msg.slice_bits() != SIZE_TIME);
+
+    int judgment_time = msg~load_uint(SIZE_TIME);
+
+    (
+        int state, int price, int security_deposit, int task_execution_time,
+        cell customer_data, cell executor_data, cell state_data
+    ) = load_data();
+
+    slice state_data_slice = state_data.begin_parse();
+    int execution_time_end = state_data_slice~load_uint(SIZE_TIME);
+
+    throw_if(STATUS_ACCESS_DENIED, now() <= execution_time_end);
+
+    __judgment_constructor(judgment_time);
+}
+
+() __judgment_constructor(int judgment_time) impure {
+    (
+        int state, int price, int security_deposit, int task_execution_time,
+        cell customer_data, cell executor_data, cell state_data
+    ) = load_data();
+
+    cell new_state_data = begin_cell()
+                          .store_uint(now() + judgment_time, SIZE_TIME)
+                          .store_ref(begin_cell().end_cell())
+                          .store_ref(begin_cell().end_cell())
+                          .store_ref(begin_cell().end_cell())
+                          .store_ref(begin_cell().end_cell())
+                          .end_cell();
+    
+    save_data(
+        STATE_JUDGMENT, price, security_deposit, task_execution_time,
+        customer_data, executor_data, new_state_data
+    );
+}
+
+() op_add_argument(slice msg, cell sender) impure {
+    throw_if(STATUS_WRONG_STATE, __get_state() != STATE_JUDGMENT);
+
+    throw_if(STATUS_ACCESS_DENIED, ~ (__is_sender_customer(sender) | __is_sender_executor(sender)));
+
+    throw_if(STATUS_MESSAGE_ERROR, msg.slice_refs() != 1);
+
+    cell argument = msg~load_ref();
+
+    throw_if(STATUS_MESSAGE_ERROR, ~ __check_text_data_cell_size(argument));
+
+    (
+        int state, int price, int security_deposit, int task_execution_time,
+        cell customer_data, cell executor_data, cell state_data
+    ) = load_data();
+
+    slice state_data_slice = state_data.begin_parse();
+    int judgment_time_end = state_data_slice~load_uint(SIZE_TIME);
+    cell customer_arguments = state_data_slice~load_ref();
+    cell executor_arguments = state_data_slice~load_ref();
+    cell votes = state_data_slice~load_ref();
+    cell judges = state_data_slice~load_ref();
+
+    if (__is_sender_customer(sender)) {
+        customer_arguments~list_push(argument);
+    }
+    else {
+        executor_arguments~list_push(argument);
+    }
+
+    cell new_state_data = begin_cell()
+                                .store_uint(judgment_time_end, SIZE_TIME)
+                                .store_ref(customer_arguments)
+                                .store_ref(executor_arguments)
+                                .store_ref(votes)
+                                .store_ref(judges)
+                                .end_cell();
+
+    save_data(
+        state, price, security_deposit, task_execution_time,
+        customer_data, executor_data, new_state_data
+    );
+}
+
+int __check_vote_cell(cell vote_data);
+
+() op_vote(slice msg, cell sender, int value) impure {
+    throw_if(STATUS_WRONG_STATE, __get_state() != STATE_JUDGMENT);
+
+    throw_if(STATUS_ACCESS_DENIED, (__is_sender_customer(sender) | __is_sender_executor(sender)));
+
+    throw_if(STATUS_MESSAGE_ERROR, msg.slice_refs() != 1);
+
+    cell vote_data = begin_cell()
+                     .store_slice(msg~load_ref().begin_parse())
+                     .store_ref(sender)
+                     .end_cell();
+
+    throw_if(STATUS_MESSAGE_ERROR, ~ __check_vote_cell(vote_data));
+
+    (
+        int state, int price, int security_deposit, int task_execution_time,
+        cell customer_data, cell executor_data, cell state_data
+    ) = load_data();
+
+    throw_if(STATUS_VALUE_ERROR, value < security_deposit);
+
+    slice state_data_slice = state_data.begin_parse();
+    int judgment_time_end = state_data_slice~load_uint(SIZE_TIME);
+    cell customer_arguments = state_data_slice~load_ref();
+    cell executor_arguments = state_data_slice~load_ref();
+    cell votes = state_data_slice~load_ref();
+    cell judges = state_data_slice~load_ref();
+
+    throw_if(STATUS_ALREADY_VOTED, judges.list_contains?(sender));
+
+    votes~list_push(vote_data);
+    judges~list_push(sender);
+
+    cell new_state_data = begin_cell()
+                          .store_uint(judgment_time_end, SIZE_TIME)
+                          .store_ref(customer_arguments)
+                          .store_ref(executor_arguments)
+                          .store_ref(votes)
+                          .store_ref(judges)
+                          .end_cell();
+    
+    save_data(
+        state, price, security_deposit, task_execution_time,
+        customer_data, executor_data, new_state_data
+    );
+}
+
+int __check_vote_cell(cell vote_cell) {
+    slice vote_slice = vote_cell.begin_parse();
+    return vote_slice.slice_bits() == (SIZE_ID + SIZE_HASH + SIZE_TIME + SIZE_VOTE);
+}
+
+() __end_judgment();
+
+() op_close_judgment(cell sender) impure {
+    throw_if(STATUS_WRONG_STATE, __get_state() != STATE_JUDGMENT);
+
+    (
+        int state, int price, int security_deposit, int task_execution_time,
+        cell customer_data, cell executor_data, cell state_data
+    ) = load_data();
+
+    slice state_data_slice = state_data.begin_parse();
+    int judgment_time_end = state_data_slice~load_uint(SIZE_TIME);
+
+    throw_if(STATUS_ACCESS_DENIED, now() <= judgment_time_end);
+
+    __end_judgment();
+
+    save_data(
+        STATE_CLOSED_AFTER_JUDGMENT, price, security_deposit, task_execution_time,
+        customer_data, executor_data, state_data
+    );
+}
+
+(int, int, int) __summarize_judgment(cell votes);
+
+int __count_winner_reward(int winner_votes, int lower_votes, int security_deposit);
+
+() __pay_rewards(int winner_vote, int reward, cell votes);
+
+() __end_judgment() {
+    (
+        int state, int price, int security_deposit, int task_execution_time,
+        cell customer_data, cell executor_data, cell state_data
+    ) = load_data();
+
+    slice state_data_slice = state_data.begin_parse();
+    int judgment_time_end = state_data_slice~load_uint(SIZE_TIME);
+    cell customer_arguments = state_data_slice~load_ref();
+    cell executor_arguments = state_data_slice~load_ref();
+    cell votes = state_data_slice~load_ref();
+    cell judges = state_data_slice~load_ref();
+
+    (
+        int num_winner_votes, 
+        int num_loser_votes, 
+        int winner_vote
+    ) = __summarize_judgment(votes);
+    int winner_reward = __count_winner_reward(num_winner_votes, num_loser_votes, security_deposit);
+
+    __pay_rewards(winner_vote, winner_reward, votes);
+}
+
+(int, int, int) __summarize_judgment(cell votes) {
+    int votes_for_customer = 0;
+    int votes_for_executor = 0;
+
+    while ~ (votes.list_empty?()) {
+        cell vote = votes~list_pop();
+        slice vote_slice = vote.begin_parse();
+        vote_slice~skip_bits(SIZE_ID + SIZE_HASH + SIZE_TIME);
+        int judge_vote = vote_slice~load_int(SIZE_VOTE);
+        if (judge_vote) {
+            votes_for_customer = votes_for_customer + 1;
+        }
+        else {
+            votes_for_executor = votes_for_executor + 1;
+        }
+    }
+
+    if (votes_for_customer > votes_for_executor) {
+        return (
+            votes_for_customer,
+            votes_for_executor,
+            -1
+        );
+    }
+    else {
+        return (
+            votes_for_executor,
+            votes_for_customer,
+            0
+        );
+    }
+    ;; customer wins if votes_for_customer > votes_for_executor
+    ;; executor wins if votes_for_executors <= votes_for_customer
+}
+
+int __count_winner_reward(int winner_votes, int loser_votes, int security_deposit) {
+    return (loser_votes + 2) * security_deposit / winner_votes;
+}
+
+() __pay_reward_to_winner(int winner_vote);
+
+() __pay_balance_to_company();
+
+() __pay_rewards(int winner_vote, int reward, cell votes) {
+    while ~ (votes.list_empty?()) {
+        cell vote = votes~list_pop();
+        slice vote_slice = vote.begin_parse();
+        vote_slice~skip_bits(SIZE_ID + SIZE_HASH + SIZE_TIME);
+        int judge_vote = vote_slice~load_int(SIZE_VOTE);
+        if (judge_vote == winner_vote) {
+            cell judge = vote_slice~load_ref();
+            utils::transfer(judge.begin_parse(), reward, utils::DESTROY_IF_ZERO);
+        }
+    }
+
+    __pay_reward_to_winner(winner_vote);
+
+    __pay_balance_to_company();
+}
+
+() __pay_reward_to_winner(int winner_vote) {
+    (
+        int state, int price, int security_deposit, int task_execution_time,
+        cell customer_data, cell executor_data, cell state_data
+    ) = load_data();
+
+    cell winner_data = customer_data;
+    if ~ (winner_vote) {
+        winner_data = executor_data;
+    }
+
+    slice winner_data_slice = winner_data.begin_parse();
+    cell winner_address = winner_data_slice~load_ref();
+
+    utils::transfer(winner_address.begin_parse(), price + security_deposit, utils::DESTROY_IF_ZERO);
+}
+
+() __pay_balance_to_company() {
+    [int total_balance, cell other_currencies_dict] = get_balance();
+
+    utils::transfer(COMPANY_ADDRESS, total_balance, utils::CARRY_ALL_BALANCE);
+}
+
+_ load_data() {
+    slice data = get_data().begin_parse();
+
+    int state = data~load_uint(SIZE_STATE);
+    int price = data~load_uint(SIZE_COIN);
+    int security_deposit = data~load_uint(SIZE_COIN);
+    int task_execution_time = data~load_uint(SIZE_TIME);
+    cell customer_data = data~load_ref();
+    cell executor_data = data~load_ref();
+    cell state_data = data~load_ref();
+
+    return (
+        state, price, security_deposit, task_execution_time,
+        customer_data, executor_data, state_data
+    );
+}
+
+() save_data(
+    int state, int price, int security_deposit, int task_execution_time,
+    cell customer_data, cell executor_data, cell state_data
+) impure {
+    cell new_data = begin_cell()
+                    .store_uint(state, SIZE_STATE)
+                    .store_uint(price, SIZE_COIN)
+                    .store_uint(security_deposit, SIZE_COIN)
+                    .store_uint(task_execution_time, SIZE_TIME)
+                    .store_ref(customer_data)
+                    .store_ref(executor_data)
+                    .store_ref(state_data)
+                    .end_cell();
+    set_data(new_data);
+}
+
+int get_state() method_id {
+    return __get_state();
+}
+
+int get_price() method_id {
+    slice data_slice = get_data().begin_parse();
+    data_slice~skip_bits(SIZE_STATE);
+    int price = data_slice~load_uint(SIZE_COIN);
+    return price;
+}
+
+int get_security_deposit() method_id {
+    slice data_slice = get_data().begin_parse();
+    data_slice~skip_bits(SIZE_STATE + SIZE_COIN);
+    int security_deposit = data_slice~load_uint(SIZE_COIN);
+    return security_deposit;
+}
+
+int get_task_execution_time() method_id {
+    slice data_slice = get_data().begin_parse();
+    data_slice~skip_bits(SIZE_STATE + SIZE_COIN + SIZE_COIN);
+    int task_execution_time = data_slice~load_uint(SIZE_TIME);
+    return task_execution_time;
+}
+
+cell get_customer() method_id {
+    slice data_slice = get_data().begin_parse();
+    data_slice~skip_bits(SIZE_STATE + SIZE_COIN + SIZE_COIN + SIZE_TIME);
+    cell customer_data = data_slice~load_ref();
+    slice customer_data_slice = customer_data.begin_parse();
+    cell customer = customer_data_slice~load_ref();
+    return customer;
+}
+
+(int, int, int) get_task_data() method_id {
+    slice data_slice = get_data().begin_parse();
+    data_slice~skip_bits(SIZE_STATE + SIZE_COIN + SIZE_COIN + SIZE_TIME);
+    cell customer_data = data_slice~load_ref();
+    slice customer_data_slice = customer_data.begin_parse();
+    cell _customer = customer_data_slice~load_ref();
+    cell task_data = customer_data_slice~load_ref();
+    slice task_data_slice = task_data.begin_parse();
+    int task_id = task_data_slice~load_uint(SIZE_ID);
+    int task_hash = task_data_slice~load_uint(SIZE_HASH);
+    int task_timestamp = task_data_slice~load_uint(SIZE_TIME);
+    return (task_id, task_hash, task_timestamp);
+}
+
+;; get methods below returns cell which contains:
+;;      SIZE_STATUS status code
+;;      get method data
+
+cell get_executor() method_id {
+    if (__get_state() < STATE_EXECUTION) {
+        return begin_cell()
+               .store_uint(STATUS_WRONG_STATE, SIZE_STATUS)
+               .store_ref(begin_cell().end_cell())
+               .end_cell();
+    }
+    slice data_slice = get_data().begin_parse();
+    data_slice~skip_bits(SIZE_STATE + SIZE_COIN + SIZE_COIN + SIZE_TIME);
+    cell _customer_data = data_slice~load_ref();
+    cell executor_data = data_slice~load_ref();
+    slice executor_data_slice = executor_data.begin_parse();
+    cell executor = executor_data_slice~load_ref();
+    return begin_cell()
+           .store_uint(STATUS_OK, SIZE_STATUS)
+           .store_ref(executor)
+           .end_cell();
+}
+
+cell get_solutions() method_id {
+    if (__get_state() < STATE_EXECUTION) {
+        return begin_cell()
+               .store_uint(STATUS_WRONG_STATE, SIZE_STATUS)
+               .store_ref(begin_cell().end_cell())
+               .end_cell();
+    }
+    slice data_slice = get_data().begin_parse();
+    data_slice~skip_bits(SIZE_STATE + SIZE_COIN + SIZE_COIN + SIZE_TIME);
+    cell _customer_data = data_slice~load_ref();
+    cell executor_data = data_slice~load_ref();
+    slice executor_data_slice = executor_data.begin_parse();
+    cell _executor = executor_data_slice~load_ref();
+    cell solution_data = executor_data_slice~load_ref();
+    return begin_cell()
+           .store_uint(STATUS_OK, SIZE_STATUS)
+           .store_ref(solution_data)
+           .end_cell();
+}
+
+cell get_potential_executors() method_id {
+    if (__get_state() != STATE_MAKE_DEAL) {
+        return begin_cell()
+               .store_uint(STATUS_WRONG_STATE, SIZE_STATUS)
+               .store_ref(begin_cell().end_cell())
+               .end_cell();
+    }
+    slice data_slice = get_data().begin_parse();
+    data_slice~skip_bits(SIZE_STATE + SIZE_COIN + SIZE_COIN + SIZE_TIME);
+    cell _customer_data = data_slice~load_ref();
+    cell _executor_data = data_slice~load_ref();
+    cell state_data = data_slice~load_ref();
+    slice state_data_slice = state_data.begin_parse();
+    cell potential_executors = state_data_slice~load_ref();
+    return begin_cell()
+           .store_uint(STATUS_OK, SIZE_STATUS)
+           .store_ref(potential_executors)
+           .end_cell();
+}
+
+cell get_chosen_executors() method_id {
+    if (__get_state() != STATE_MAKE_DEAL) {
+        return begin_cell()
+               .store_uint(STATUS_WRONG_STATE, SIZE_STATUS)
+               .store_ref(begin_cell().end_cell())
+               .end_cell();
+    }
+    slice data_slice = get_data().begin_parse();
+    data_slice~skip_bits(SIZE_STATE + SIZE_COIN + SIZE_COIN + SIZE_TIME);
+    cell _customer_data = data_slice~load_ref();
+    cell _executor_data = data_slice~load_ref();
+    cell state_data = data_slice~load_ref();
+    slice state_data_slice = state_data.begin_parse();
+    cell _potential_executors = state_data_slice~load_ref();
+    cell chosen_executors = state_data_slice~load_ref();
+    return begin_cell()
+           .store_uint(STATUS_OK, SIZE_STATUS)
+           .store_ref(chosen_executors)
+           .end_cell();
+}
+
+cell get_execution_time_end() method_id {
+    if (__get_state() != STATE_EXECUTION) {
+        return begin_cell()
+               .store_uint(STATUS_WRONG_STATE, SIZE_STATUS)
+               .store_uint(0, SIZE_TIME)
+               .end_cell();
+    }
+    slice data_slice = get_data().begin_parse();
+    data_slice~skip_bits(SIZE_STATE + SIZE_COIN + SIZE_COIN + SIZE_TIME);
+    cell _customer_data = data_slice~load_ref();
+    cell _executor_data = data_slice~load_ref();
+    cell state_data = data_slice~load_ref();
+    slice state_data_slice = state_data.begin_parse();
+    int execution_time_end = state_data_slice~load_uint(SIZE_TIME);
+    return begin_cell()
+           .store_uint(STATUS_OK, SIZE_STATUS)
+           .store_uint(execution_time_end, SIZE_TIME)
+           .end_cell();
+}
+
+cell get_judgment_time_end() method_id {
+    if (__get_state() != STATE_JUDGMENT) {
+        return begin_cell()
+               .store_uint(STATUS_WRONG_STATE, SIZE_STATUS)
+               .store_uint(0, SIZE_TIME)
+               .end_cell();
+    }
+    slice data_slice = get_data().begin_parse();
+    data_slice~skip_bits(SIZE_STATE + SIZE_COIN + SIZE_COIN + SIZE_TIME);
+    cell _customer_data = data_slice~load_ref();
+    cell _executor_data = data_slice~load_ref();
+    cell state_data = data_slice~load_ref();
+    slice state_data_slice = state_data.begin_parse();
+    int judgment_time_end = state_data_slice~load_uint(SIZE_TIME);
+    return begin_cell()
+           .store_uint(STATUS_OK, SIZE_STATUS)
+           .store_uint(judgment_time_end, SIZE_TIME)
+           .end_cell();
+}
+
+cell get_customer_arguments() method_id {
+    if (__get_state() < STATE_JUDGMENT) {
+        return begin_cell()
+               .store_uint(STATUS_WRONG_STATE, SIZE_STATUS)
+               .store_ref(begin_cell().end_cell())
+               .end_cell();
+    }
+    slice data_slice = get_data().begin_parse();
+    data_slice~skip_bits(SIZE_STATE + SIZE_COIN + SIZE_COIN + SIZE_TIME);
+    cell _customer_data = data_slice~load_ref();
+    cell _executor_data = data_slice~load_ref();
+    cell state_data = data_slice~load_ref();
+    slice state_data_slice = state_data.begin_parse();
+    state_data_slice~skip_bits(SIZE_TIME);
+    cell customer_arguments = state_data_slice~load_ref();
+    return begin_cell()
+           .store_uint(STATUS_OK, SIZE_STATUS)
+           .store_ref(customer_arguments)
+           .end_cell();
+}
+
+cell get_executor_arguments() method_id {
+    if (__get_state() < STATE_JUDGMENT) {
+        return begin_cell()
+               .store_uint(STATUS_WRONG_STATE, SIZE_STATUS)
+               .store_ref(begin_cell().end_cell())
+               .end_cell();
+    }
+    slice data_slice = get_data().begin_parse();
+    data_slice~skip_bits(SIZE_STATE + SIZE_COIN + SIZE_COIN + SIZE_TIME);
+    cell _customer_data = data_slice~load_ref();
+    cell _executor_data = data_slice~load_ref();
+    cell state_data = data_slice~load_ref();
+    slice state_data_slice = state_data.begin_parse();
+    state_data_slice~skip_bits(SIZE_TIME);
+    cell _customer_arguments = state_data_slice~load_ref();
+    cell executor_arguments = state_data_slice~load_ref();
+    return begin_cell()
+           .store_uint(STATUS_OK, SIZE_STATUS)
+           .store_ref(executor_arguments)
+           .end_cell();
+}
+
+cell get_num_votes() method_id {
+    if (__get_state() < STATE_JUDGMENT) {
+        return begin_cell()
+               .store_uint(STATUS_WRONG_STATE, SIZE_STATUS)
+               .store_uint(0, SIZE_QUANTITY)
+               .end_cell();
+    }
+    slice data_slice = get_data().begin_parse();
+    data_slice~skip_bits(SIZE_STATE + SIZE_COIN + SIZE_COIN + SIZE_TIME);
+    cell _customer_data = data_slice~load_ref();
+    cell _executor_data = data_slice~load_ref();
+    cell state_data = data_slice~load_ref();
+    slice state_data_slice = state_data.begin_parse();
+    state_data_slice~skip_bits(SIZE_TIME);
+    cell _customer_arguments = state_data_slice~load_ref();
+    cell _executor_arguments = state_data_slice~load_ref();
+    cell votes = state_data_slice~load_ref();
+    int num_votes = votes.list_size();
+    return begin_cell()
+           .store_uint(STATUS_OK, SIZE_STATUS)
+           .store_uint(num_votes, SIZE_QUANTITY)
+           .end_cell();
+}
+
+cell get_votes() method_id {
+    if (__get_state() < STATE_CLOSED_AFTER_JUDGMENT) {
+        return begin_cell()
+               .store_uint(STATUS_WRONG_STATE, SIZE_STATUS)
+               .store_ref(begin_cell().end_cell())
+               .end_cell();
+    }
+    slice data_slice = get_data().begin_parse();
+    data_slice~skip_bits(SIZE_STATE + SIZE_COIN + SIZE_COIN + SIZE_TIME);
+    cell _customer_data = data_slice~load_ref();
+    cell _executor_data = data_slice~load_ref();
+    cell state_data = data_slice~load_ref();
+    slice state_data_slice = state_data.begin_parse();
+    state_data_slice~skip_bits(SIZE_TIME);
+    cell _customer_arguments = state_data_slice~load_ref();
+    cell _executor_arguments = state_data_slice~load_ref();
+    cell votes = state_data_slice~load_ref();
+    return begin_cell()
+           .store_uint(STATUS_OK, SIZE_STATUS)
+           .store_ref(votes)
+           .end_cell();
+}
+
+int is_customer(cell sender) method_id {
+    return __is_sender_customer(sender);
+}
+
+int is_executor(cell sender) method_id {
+    if (__get_state() < STATE_EXECUTION) {
+        return 0;
+    }
+    return __is_sender_executor(sender);
+}
+
+int is_judge(cell sender) method_id {
+    if (__get_state() != STATE_JUDGMENT) {
+        return 0;
+    }
+    (
+        int state, int price, int security_deposit, int task_execution_time,
+        cell customer_data, cell executor_data, cell state_data
+    ) = load_data();
+
+    slice state_data_slice = state_data.begin_parse();
+    int _judgment_time_end = state_data_slice~load_uint(SIZE_TIME);
+    cell _customer_arguments = state_data_slice~load_ref();
+    cell _executor_arguments = state_data_slice~load_ref();
+    cell _votes = state_data_slice~load_ref();
+    cell judges = state_data_slice~load_ref();
+    return judges.list_contains?(sender);
+}

@@ -1,0 +1,9 @@
+{% extends "base_eth.html" %}
+
+{% block content %}
+    <form method="POST" action="{{ url }}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Vote for {{ bid }} {{ token_name }}</button>
+    </form>
+{% endblock content %}

@@ -1,0 +1,47 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+    <form id="redirect-form" method="POST" action="{% url 'ton-sign-tx' %}">
+        <input type="hidden" name="redirect_to"≠/>
+    </form>
+    <button onclick="on_load()">Sign transaction</button>
+
+    <script lang="text/javascript">
+        {#window.onload = on_load;#}
+
+        async function on_load() {
+            await connectNetwork();
+
+            let form = document.getElementById("redirect-form");
+
+            const transaction = getTxParams();
+
+            await ton.send("ton_sendTransaction", [transaction]);
+
+            const searchParams = new URLSearchParams(window.location.search);
+            const redirect_to = searchParams.get("redirect_to");
+
+            let inputs = form.getElementsByTagName("input");
+            if (redirect_to !== null) {
+                inputs.item(0).value = redirect_to;
+            }
+            form.submit();
+        }
+
+        async function connectNetwork() {
+            await window.ton.send("ton_requestAccounts");
+        }
+
+        function getTxParams() {
+            return {
+                to: "{{ transaction.to }}",
+                value: "{{ transaction.value }}",
+                stateInit: "{{ transaction.state_init }}",
+                {% if transaction.data %}
+                    data: "{{ transaction.data }}",
+                    dataType: "boc",
+                {% endif %}
+            };
+        }
+    </script>
+{% endblock content %}
